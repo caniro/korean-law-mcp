@@ -10,6 +10,7 @@ import { InMemoryEventStore } from "@modelcontextprotocol/sdk/examples/shared/in
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
 import { sessionStore, setSessionApiKey, deleteSession } from "../lib/session-state.js"
 import { VERSION } from "../version.js"
+import { type ToolProfile, parseProfile } from "../lib/tool-profiles.js"
 
 // 세션 정보 (Transport + Server + 마지막 접근 시간)
 interface SessionInfo {
@@ -21,7 +22,7 @@ interface SessionInfo {
 // 세션 맵
 const sessions = new Map<string, SessionInfo>()
 
-export async function startHTTPServer(createServer: () => Server, port: number) {
+export async function startHTTPServer(createServer: (profile?: ToolProfile) => Server, port: number) {
   const app = express()
   app.use(express.json({ limit: "100kb" }))
 
@@ -103,7 +104,12 @@ export async function startHTTPServer(createServer: () => Server, port: number) 
       transport: "streamable-http",
       endpoints: {
         mcp: "/mcp",
+        "mcp-lite": "/mcp?profile=lite",
         health: "/health"
+      },
+      profiles: {
+        lite: "14 tools (chains + meta, for web clients)",
+        full: "all tools (default)"
       }
     })
   })
@@ -162,11 +168,12 @@ export async function startHTTPServer(createServer: () => Server, port: number) 
         })
         return
       } else if (!sessionId && isInitializeRequest(req.body)) {
-        // 새 세션 초기화
-        console.error(`[POST /mcp] New initialization request`)
+        // 새 세션 초기화 — URL 쿼리파라미터에서 프로필 결정
+        const profile = parseProfile(req.query.profile as string | undefined)
+        console.error(`[POST /mcp] New initialization request (profile: ${profile})`)
 
         const eventStore = new InMemoryEventStore()
-        const sessionServer = createServer()
+        const sessionServer = createServer(profile)
         transport = new StreamableHTTPServerTransport({
           sessionIdGenerator: () => randomUUID(),
           enableJsonResponse: true,

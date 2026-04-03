@@ -1,12 +1,12 @@
 # Korean Law MCP
 
-**대한민국 법령 검색·조회·분석 87개 도구** — 법령, 판례, 행정규칙, 자치법규, 조약, 해석례를 AI 어시스턴트나 터미널에서 바로 사용.
+**대한민국 법령 검색·조회·분석 89개 도구** — 법령, 판례, 행정규칙, 자치법규, 조약, 해석례를 AI 어시스턴트나 터미널에서 바로 사용.
 
 [![npm version](https://img.shields.io/npm/v/korean-law-mcp.svg)](https://www.npmjs.com/package/korean-law-mcp)
 [![MCP 1.27](https://img.shields.io/badge/MCP-1.27-blue)](https://modelcontextprotocol.io)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> 법제처 Open API 기반 MCP 서버 + CLI. Claude Desktop, Cursor, Windsurf, Zed 등에서 바로 사용 가능.
+> 법제처 Open API 기반 MCP 서버 + CLI. Claude Desktop, Cursor, Windsurf, Zed, Claude.ai 등에서 바로 사용 가능.
 
 [English](./README-EN.md)
 
@@ -14,17 +14,24 @@
 
 ---
 
-## v2.2.0 변경사항
+## v2.3.0 변경사항
+
+- **도구 프로필 (lite/full)** — 웹 클라이언트(Claude.ai 등)용 lite 프로필 도입. 89개 → 14개로 자동 축소하여 컨텍스트 소비 87% 절감. `/mcp?profile=lite`로 사용.
+  - **체인 8개** + 핵심 직접 도구 4개 + 메타 도구 2개 = 14개로 동일 기능 커버
+  - `discover_tools`: 의도/카테고리로 숨겨진 전문 도구 검색
+  - `execute_tool`: discover로 찾은 도구를 프록시 실행
+- **kordoc 통합 파서** — 자체 HWP5/HWPX/PDF 파서 5개를 [kordoc](https://github.com/chrisryugj/kordoc) 통합 파서로 교체. 의존성 경량화.
+
+<details>
+<summary>v2.2.0 변경사항</summary>
 
 - **23개 신규 도구 (64 → 87)** — 조약, 법령-자치법규 연계, 학칙/공단/공공기관 규정, 특별행정심판, 감사원 결정, 조항상세, 문서분석, 행정규칙 신구대조 등 대폭 확장.
-- **문서분석 엔진** — 8종 문서유형 분류, 17개 리스크규칙, 금액/기간 추출, 조항 충돌 탐지. 계약서나 MOU를 넣으면 법적 리스크를 구조화해서 돌려준다.
-- **법령-자치법규 연계 (4개 도구)** — 법률↔조례 위임 체인을 양방향 추적. 어떤 법률을 어느 조례가 구현하는지, 또는 조례의 근거 법령이 뭔지 한 번에.
+- **문서분석 엔진** — 8종 문서유형 분류, 17개 리스크규칙, 금액/기간 추출, 조항 충돌 탐지.
+- **법령-자치법규 연계 (4개 도구)** — 법률↔조례 위임 체인을 양방향 추적.
 - **조약 지원 (2개 도구)** — 대한민국이 체결한 양자/다자 조약 검색 및 전문 조회.
-- **학칙/공단/공공기관 규정 (6개 도구)** — 학교 규칙, 공기업 규정, 공공기관 규정 각각 검색 + 전문 조회.
-- **특별행정심판 (4개 도구)** — 감사원 특별행정심판과 이의신청 재결문 검색·조회.
-- **판례/해석례 날짜 필터** — `fromDate`/`toDate` 파라미터로 기간 지정 검색 가능.
-- **자연어 날짜 파서** — CLI에서 `"최근 3개월"`, `"작년"`, `"2024년 이후"` 등 자연어 시간 표현을 YYYYMMDD로 자동 변환.
-- **보안 강화** — CORS 오리진 제어, API 키 헤더 전용(쿼리스트링 제거), 보안 헤더, 세션 ID 마스킹.
+- **보안 강화** — CORS 오리진 제어, API 키 헤더 전용, 보안 헤더, 세션 ID 마스킹.
+
+</details>
 
 <details>
 <summary>v1.8.0 – v1.9.0 기능</summary>
@@ -43,7 +50,7 @@
 
 대한민국에는 **1,600개 이상의 현행 법률**, **10,000개 이상의 행정규칙**, 그리고 대법원·헌법재판소·조세심판원·관세청까지 이어지는 방대한 판례 체계가 있습니다. 이 모든 게 [법제처](https://www.law.go.kr)라는 하나의 사이트에 있지만, 개발자 경험은 최악입니다.
 
-이 프로젝트는 그 전체 법령 시스템을 **87개 구조화된 도구**로 감싸서, AI 어시스턴트나 스크립트에서 바로 호출할 수 있게 만듭니다. 법제처를 백 번째 수동 검색하다 지친 공무원이 만들었습니다.
+이 프로젝트는 그 전체 법령 시스템을 **89개 구조화된 도구**로 감싸서, AI 어시스턴트나 스크립트에서 바로 호출할 수 있게 만듭니다. 법제처를 백 번째 수동 검색하다 지친 공무원이 만들었습니다.
 
 ---
 
@@ -92,6 +99,20 @@ API 키는 [법제처 Open API](https://open.law.go.kr/LSO/openApi/guideResult.d
 }
 ```
 
+**Claude.ai 등 웹 클라이언트** — 컨텍스트 절약을 위해 lite 프로필 권장:
+
+```json
+{
+  "mcpServers": {
+    "korean-law": {
+      "url": "https://korean-law-mcp.fly.dev/mcp?profile=lite"
+    }
+  }
+}
+```
+
+> lite 프로필은 체인 8개 + 핵심 4개 + 메타 2개 = **14개 도구**로 동일 기능 커버. 특수 도구가 필요하면 `discover_tools` → `execute_tool`로 접근.
+
 ### CLI
 
 ```bash
@@ -101,7 +122,7 @@ export LAW_OC=your-api-key
 korean-law search_law --query "관세법"
 korean-law get_law_text --mst 160001 --jo "제38조"
 korean-law search_precedents --query "부당해고"
-korean-law list                          # 87개 전체 도구 목록
+korean-law list                          # 89개 전체 도구 목록
 korean-law list --category 판례          # 카테고리별 필터
 korean-law help search_law               # 도구 도움말
 ```
@@ -126,7 +147,7 @@ korean-law help search_law               # 도구 도움말
 
 ---
 
-## 도구 목록 (87개)
+## 도구 목록 (89개)
 
 | 카테고리 | 개수 | 주요 도구 |
 |----------|------|----------|
@@ -142,19 +163,21 @@ korean-law help search_law               # 도구 도움말
 | **학칙/공단/공공기관** | 6 | `search_school_rules`, `search_public_corp_rules`, `search_public_institution_rules` |
 | **지식베이스** | 7 | `get_legal_term_kb`, `get_daily_to_legal`, `get_related_laws` |
 | **체인** | 8 | `chain_full_research`, `chain_law_system`, `chain_document_review` |
+| **메타** | 2 | `discover_tools`, `execute_tool` (lite 프로필용) |
 | **기타** | 10 | AI 검색, 영문법령, 연혁법령, 법령용어, 약칭, 법체계도, 행정규칙비교 |
 
-전체 도구 상세는 [영문 README](./README-EN.md#tool-categories-87-total) 참조.
+전체 도구 상세는 [영문 README](./README-EN.md#tool-categories-89-total) 참조.
 
 ---
 
 ## 주요 특징
 
-- **87개 법률 도구** — 법령, 판례, 행정규칙, 자치법규, 헌재결정, 조세심판, 관세해석, 조약, 학칙/공단/공공기관 규정, 법령용어
-- **MCP + CLI** — Claude Desktop에서도, 터미널에서도 같은 87개 도구 사용
+- **89개 법률 도구** — 법령, 판례, 행정규칙, 자치법규, 헌재결정, 조세심판, 관세해석, 조약, 학칙/공단/공공기관 규정, 법령용어
+- **MCP + CLI** — Claude Desktop에서도, 터미널에서도 같은 89개 도구 사용
 - **법률 도메인 특화** — 약칭 자동 인식(`화관법` → `화학물질관리법`), 조문번호 변환(`제38조` ↔ `003800`), 3단 위임 구조 시각화
 - **별표/별지서식 본문 추출** — HWPX·HWP 파일 자동 다운로드 → 표/텍스트를 Markdown 변환
 - **8개 체인 도구** — 복합 리서치를 한 번의 호출로 (예: `chain_full_research`: AI검색→법령→판례→해석)
+- **도구 프로필** — 웹 클라이언트용 lite(14개), 파워유저용 full(89개) 자동 선택
 - **캐시** — 검색 1시간, 조문 24시간 TTL
 - **원격 엔드포인트** — 설치 없이 `https://korean-law-mcp.fly.dev/mcp`로 바로 사용
 
@@ -162,7 +185,7 @@ korean-law help search_law               # 도구 도움말
 
 ## 문서
 
-- [docs/API.md](docs/API.md) — 87개 도구 레퍼런스
+- [docs/API.md](docs/API.md) — 89개 도구 레퍼런스 (프로필 포함)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — 시스템 설계
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — 개발 가이드
 

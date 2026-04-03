@@ -1,6 +1,6 @@
 # Korean Law MCP - System Architecture
 
-> **v1.9.0** | Last Updated: March 2026
+> **v2.3.0** | Last Updated: April 2026
 
 ---
 
@@ -14,10 +14,10 @@
             (Local Desktop)        (Remote: Fly.io)
                      │                    │
 ┌────────────────────▼────────────────────▼────────────────────┐
-│               Korean Law MCP Server (v1.9.0)                  │
+│               Korean Law MCP Server (v2.3.0)                  │
 │                                                               │
 │  ┌───────────────────────────────────────────────────────┐   │
-│  │     Tool Registry (64 Zod-Validated Tools)            │   │
+│  │     Tool Registry (89 Zod-Validated Tools)            │   │
 │  │         tool-registry.ts → allTools[]                 │   │
 │  ├───────────────────────────────────────────────────────┤   │
 │  │  검색 (11)   │ 조회 (9)      │ 분석 (9)              │   │

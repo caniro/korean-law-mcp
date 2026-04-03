@@ -9,6 +9,8 @@ import { z } from "zod"
 import type { LawApiClient } from "./lib/api-client.js"
 import type { McpTool } from "./lib/types.js"
 import { formatToolError } from "./lib/errors.js"
+import { type ToolProfile, filterToolsByProfile } from "./lib/tool-profiles.js"
+import { discoverTools, DiscoverToolsSchema, executeTool, ExecuteToolSchema, setAllToolsRef } from "./tools/meta-tools.js"
 
 // Tool imports
 import { searchLaw, SearchLawSchema } from "./tools/search.js"
@@ -633,6 +635,20 @@ export const allTools: McpTool[] = [
     schema: AnalyzeDocumentSchema,
     handler: analyzeDocument
   },
+
+  // === 메타 도구 (lite 프로필용) ===
+  {
+    name: "discover_tools",
+    description: "[메타] 의도/카테고리로 사용 가능한 전문 도구 검색. 체인 도구로 부족할 때 특수 도구를 찾아 execute_tool로 실행.",
+    schema: DiscoverToolsSchema,
+    handler: discoverTools
+  },
+  {
+    name: "execute_tool",
+    description: "[메타] discover_tools로 찾은 전문 도구를 실행. tool_name과 params 전달.",
+    schema: ExecuteToolSchema,
+    handler: executeTool
+  },
 ]
 
 /**
@@ -659,19 +675,26 @@ function toMcpInputSchema(schema: unknown) {
 }
 
 /**
- * 서버에 모든 도구 등록
+ * 서버에 도구 등록
+ * @param profile - "lite" (14개, 웹 클라이언트용) | "full" (전체, 기본값)
  */
-export function registerTools(server: Server, apiClient: LawApiClient) {
-  // ListTools 핸들러
+export function registerTools(server: Server, apiClient: LawApiClient, profile: ToolProfile = "full") {
+  // 메타 도구가 전체 도구 목록 참조할 수 있도록 주입
+  setAllToolsRef(allTools)
+
+  // 프로필에 따라 노출할 도구 필터링
+  const exposedTools = filterToolsByProfile(allTools, profile)
+
+  // ListTools 핸들러 — 프로필에 맞는 도구만 노출
   server.setRequestHandler(ListToolsRequestSchema, async () => ({
-    tools: allTools.map(tool => ({
+    tools: exposedTools.map(tool => ({
       name: tool.name,
       description: tool.description,
       inputSchema: toMcpInputSchema(tool.schema)
     }))
   }))
 
-  // CallTool 핸들러
+  // CallTool 핸들러 — 전체 도구 실행 가능 (execute_tool 프록시 지원)
   server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params
 
